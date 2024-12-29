@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot de Prédiction de Cryptomonnaies By ELHEROUAL</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { 
+            background-color: #f0f2f5;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .header h1 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .card {
+            margin-bottom: 20px;
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: white;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            border-radius: 15px 15px 0 0 !important;
+            border-bottom: none;
+            padding: 1.25rem;
+        }
+        .card-header h4 {
+            margin: 0;
+            color: #1a237e;
+            font-weight: 600;
+        }
+        .price-up { 
+            color: #00c853;
+            font-weight: 600;
+        }
+        .price-down { 
+            color: #ff1744;
+            font-weight: 600;
+        }
+        .stat-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #1a237e;
+        }
+        .stat-label {
+            color: #546e7a;
+            font-size: 0.9em;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .progress {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+            transition: width 0.6s ease;
+        }
+        .market-indicator {
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+        }
+        .market-indicator.positive {
+            background: linear-gradient(135deg, #00c853 0%, #69f0ae 100%);
+            color: white;
+        }
+        .market-indicator.negative {
+            background: linear-gradient(135deg, #ff1744 0%, #ff5252 100%);
+            color: white;
+        }
+        .market-indicator.neutral {
+            background: linear-gradient(135deg, #ffd54f 0%, #ffecb3 100%);
+            color: #424242;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        .select2-container--default .select2-selection--single {
+            height: 38px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        #riskFactors {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        #riskFactors li {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #1a237e;
+        }
+        .social-stats {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .social-value {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #1a237e;
+        }
+        .language-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .language-switch button {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .language-switch button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .language-switch .current-lang {
+            font-weight: 700;
+        }
+        .language-switch .other-lang {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bot de Prédiction de Cryptomonnaies</h1>
+            <p>By ELHEROUAL</p>
+            <div class="language-switch">
+                <button id="langSwitch" class="btn btn-outline-light" data-lang="fr">
+                    <span class="current-lang">FR</span> | <span class="other-lang">EN</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <select id="cryptoSelect" class="form-select">
+                            <option value="">Sélectionnez une cryptomonnaie</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="analyzeBtn" class="btn btn-primary w-100">
+                            Analyser
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loadingSpinner" class="text-center" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p>Analyse en cours...</p>
+        </div>
+
+        <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+
+        <div id="analysisResults" style="display: none;">
+            <!-- Informations de base -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Informations de Base</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="stat-card">
+                                <div class="stat-label">Nom</div>
+                                <div class="stat-value" id="coinName"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-card">
+                                <div class="stat-label">Prix Actuel</div>
+                                <div class="stat-value" id="currentPrice"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-label">Rang Market Cap</div>
+                                <div class="stat-value" id="marketCapRank"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-label">Volume Total (24h)</div>
+                                <div class="stat-value" id="totalVolume"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card">
+                                <div class="stat-label">Market Cap</div>
+                                <div class="stat-value" id="marketCap"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variations de Prix -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Variations de Prix</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-label">1 heure</div>
+                                <div class="stat-value" id="priceChange1h"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-label">24 heures</div>
+                                <div class="stat-value" id="priceChange24h"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-label">7 jours</div>
+                                <div class="stat-value" id="priceChange7d"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-label">30 jours</div>
+                                <div class="stat-value" id="priceChange30d"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analyse du Marché -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Analyse du Marché</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="stat-card">
+                                <div class="stat-label" id="marketSentimentLabel">Sentiment du Marché</div>
+                                <div class="stat-value" id="marketSentiment"></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label" id="volatilityLabel">Volatilité</div>
+                                <div class="stat-value" id="volatility"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-card">
+                                <div class="stat-label" id="tradingVolumeLabel">Volume de Trading</div>
+                                <div class="stat-value" id="tradingVolume"></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label" id="marketDominanceLabel">Dominance du Marché</div>
+                                <div class="stat-value" id="marketDominance"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Records Historiques -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Records Historiques</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="stat-card">
+                                <div class="stat-label" id="athLabel">Plus Haut Historique</div>
+                                <div class="stat-value" id="ath"></div>
+                                <div id="athDate" class="text-muted"></div>
+                                <div id="athChangePercentage"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-card">
+                                <div class="stat-label" id="atlLabel">Plus Bas Historique</div>
+                                <div class="stat-value" id="atl"></div>
+                                <div id="atlDate" class="text-muted"></div>
+                                <div id="atlChangePercentage"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations Supplémentaires -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Informations Supplémentaires</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>Description</h5>
+                            <p id="description" class="mb-4"></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>Liens</h5>
+                            <div id="links" class="mb-4"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>Statistiques Sociales</h5>
+                            <div class="social-stats">
+                                <div class="social-stat">
+                                    <div class="social-value" id="twitterFollowers"></div>
+                                    <div class="social-label" id="twitterFollowersLabel">Abonnés Twitter</div>
+                                </div>
+                                <div class="social-stat">
+                                    <div class="social-value" id="redditSubscribers"></div>
+                                    <div class="social-label" id="redditSubscribersLabel">Abonnés Reddit</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>Données de Développement</h5>
+                            <div class="row" id="devData"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphiques -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Graphiques</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="chart-container">
+                                <canvas id="priceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="chart-container">
+                                <canvas id="volumeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prédictions et Analyse -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Prédictions et Analyse</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>Contexte du Marché</h5>
+                            <p id="marketContext" class="mb-4"></p>
+                            
+                            <h5>Analyse Technique</h5>
+                            <p id="technicalAnalysis" class="mb-4"></p>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="stat-card">
+                                        <h5>Prédiction Court Terme</h5>
+                                        <p id="shortTermPrediction"></p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="stat-card">
+                                        <h5>Prédiction Moyen Terme</h5>
+                                        <p id="mediumTermPrediction"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h5 class="mt-4">Facteurs de Risque</h5>
+                            <ul id="riskFactors" class="mb-4"></ul>
+                            
+                            <div class="stat-card">
+                                <h5>Recommandation</h5>
+                                <div id="recommendation" class="market-indicator"></div>
+                                <div class="progress mt-2">
+                                    <div id="recommendationConfidence" class="progress-bar" role="progressbar"></div>
+                                </div>
+                                <small class="text-muted">Niveau de confiance</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2
+            $('#cryptoSelect').select2({
+                theme: 'bootstrap-5'
+            });
+
+            // Format numbers
+            function formatNumber(num, decimals = 2) {
+                if (num >= 1e9) return (num / 1e9).toFixed(decimals) + ' Mrd';
+                if (num >= 1e6) return (num / 1e6).toFixed(decimals) + ' M';
+                if (num >= 1e3) return (num / 1e3).toFixed(decimals) + ' K';
+                return num.toFixed(decimals);
+            }
+
+            // Format percentage
+            function formatPercentage(num) {
+                const formatted = Number(num).toFixed(2);
+                const cls = num >= 0 ? 'price-up' : 'price-down';
+                return `<span class="${cls}">${formatted}%</span>`;
+            }
+
+            // Format date
+            function formatDate(dateStr) {
+                if (!dateStr) return 'N/A';
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+
+            let priceChart = null;
+            let volumeChart = null;
+            
+            function initializeCharts() {
+                if (priceChart) {
+                    priceChart.destroy();
+                }
+                if (volumeChart) {
+                    volumeChart.destroy();
+                }
+                
+                const priceCtx = document.getElementById('priceChart').getContext('2d');
+                const volumeCtx = document.getElementById('volumeChart').getContext('2d');
+                
+                const chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltip: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                };
+                
+                priceChart = new Chart(priceCtx, {
+                    type: 'line',
+                    options: {
+                        ...chartOptions,
+                        plugins: {
+                            ...chartOptions.plugins,
+                            title: {
+                                display: true,
+                                text: 'Historique des Prix (30 jours)'
+                            }
+                        }
+                    }
+                });
+                
+                volumeChart = new Chart(volumeCtx, {
+                    type: 'bar',
+                    options: {
+                        ...chartOptions,
+                        plugins: {
+                            ...chartOptions.plugins,
+                            title: {
+                                display: true,
+                                text: 'Volume des Échanges (30 jours)'
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function updateCharts(chartData) {
+                const gradientPrice = priceChart.ctx.createLinearGradient(0, 0, 0, 400);
+                gradientPrice.addColorStop(0, 'rgba(26, 35, 126, 0.4)');
+                gradientPrice.addColorStop(1, 'rgba(26, 35, 126, 0.1)');
+                
+                priceChart.data = {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Prix (USD)',
+                        data: chartData.prices,
+                        borderColor: '#1a237e',
+                        backgroundColor: gradientPrice,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                };
+                
+                volumeChart.data = {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: 'Volume',
+                        data: chartData.volumes,
+                        backgroundColor: '#0d47a1',
+                        borderRadius: 4
+                    }]
+                };
+                
+                priceChart.update();
+                volumeChart.update();
+            }
+
+            // Load cryptocurrencies
+            $.ajax({
+                url: '/supported_coins',
+                method: 'GET',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        const select = $('#cryptoSelect');
+                        response.coins.forEach(coin => {
+                            select.append(new Option(
+                                `${coin.name} (${coin.symbol}) - Rang ${coin.market_cap_rank}`,
+                                coin.id
+                            ));
+                        });
+                    } else {
+                        $('#errorMessage').text(response.message).show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#errorMessage').text('Erreur lors du chargement des cryptomonnaies').show();
+                }
+            });
+
+            // Analyze button click handler
+            $('#analyzeBtn').click(function() {
+                const selectedCoin = $('#cryptoSelect').val();
+                if (!selectedCoin) {
+                    $('#errorMessage').text('Veuillez sélectionner une cryptomonnaie').show();
+                    return;
+                }
+
+                $('#errorMessage').hide();
+                $('#loadingSpinner').show();
+                $('#analysisResults').hide();
+
+                $.ajax({
+                    url: '/analyze',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ symbol: selectedCoin, lang: $('#langSwitch').data('lang') }),
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            const data = response.coin_data;
+                            
+                            // Update basic info
+                            $('#coinName').text(data.basic_info.name + ' (' + data.basic_info.symbol + ')');
+                            $('#currentPrice').text('$' + formatNumber(data.basic_info.current_price));
+                            $('#marketCap').text('$' + formatNumber(data.basic_info.market_cap));
+                            $('#marketCapRank').text('#' + data.basic_info.market_cap_rank);
+                            $('#totalVolume').text('$' + formatNumber(data.basic_info.total_volume));
+
+                            // Update price changes
+                            $('#priceChange1h').html(formatPercentage(data.price_changes['1h']));
+                            $('#priceChange24h').html(formatPercentage(data.price_changes['24h']));
+                            $('#priceChange7d').html(formatPercentage(data.price_changes['7d']));
+                            $('#priceChange30d').html(formatPercentage(data.price_changes['30d']));
+
+                            // Update market analysis
+                            $('#marketSentiment').text(data.analysis.market_sentiment);
+                            $('#volatility').text(data.analysis.volatility);
+                            $('#tradingVolume').text(formatNumber(data.analysis.trading_volume * 100) + '%');
+                            $('#marketDominance').text(formatNumber(data.analysis.market_dominance) + '%');
+
+                            // Update market analysis labels
+                            const t = data.translations;
+                            $('#marketSentimentLabel').text(t.market_analysis.sentiment);
+                            $('#volatilityLabel').text(t.market_analysis.volatility);
+                            $('#tradingVolumeLabel').text(t.market_analysis.volume);
+                            $('#marketDominanceLabel').text(t.market_analysis.dominance);
+
+                            // Update price history labels
+                            $('#athLabel').text(t.price_history.ath);
+                            $('#athDateLabel').text(t.price_history.ath_date);
+                            $('#athChangeLabel').text(t.price_history.ath_change);
+                            $('#atlLabel').text(t.price_history.atl);
+                            $('#atlDateLabel').text(t.price_history.atl_date);
+                            $('#atlChangeLabel').text(t.price_history.atl_change);
+
+                            // Update social info labels
+                            $('#twitterFollowersLabel').text(t.social_info.twitter);
+                            $('#redditSubscribersLabel').text(t.social_info.reddit);
+                            $('#githubStatsLabel').text(t.social_info.github);
+                            $('#githubForksLabel').text(t.social_info.forks);
+                            $('#githubStarsLabel').text(t.social_info.stars);
+                            $('#githubSubscribersLabel').text(t.social_info.subscribers);
+                            $('#githubTotalIssuesLabel').text(t.social_info.total_issues);
+                            $('#githubClosedIssuesLabel').text(t.social_info.closed_issues);
+                            $('#githubPullRequestsLabel').text(t.social_info.pull_requests);
+                            $('#githubCommitsLabel').text(t.social_info.commits);
+
+                            // Update chart titles
+                            if (priceChart && volumeChart) {
+                                priceChart.options.plugins.title.text = currentLang === 'en' ? 'Price History (30 days)' : 'Historique des Prix (30 jours)';
+                                volumeChart.options.plugins.title.text = currentLang === 'en' ? 'Trading Volume (30 days)' : 'Volume des Échanges (30 jours)';
+                                priceChart.update();
+                                volumeChart.update();
+                            }
+
+                            // Update ATH/ATL
+                            $('#ath').text('$' + formatNumber(data.market_data.ath));
+                            $('#athDate').text(formatDate(data.market_data.ath_date));
+                            $('#athChangePercentage').html(formatPercentage(data.market_data.ath_change_percentage));
+                            $('#atl').text('$' + formatNumber(data.market_data.atl));
+                            $('#atlDate').text(formatDate(data.market_data.atl_date));
+                            $('#atlChangePercentage').html(formatPercentage(data.market_data.atl_change_percentage));
+
+                            // Update additional info if available
+                            if (data.additional_info) {
+                                $('#description').text(data.additional_info.description);
+                                
+                                // Update links
+                                let linksHtml = '';
+                                if (data.additional_info.homepage) {
+                                    linksHtml += `<a href="${data.additional_info.homepage}" target="_blank" class="btn btn-outline-primary me-2">Site Web</a>`;
+                                }
+                                if (data.additional_info.reddit) {
+                                    linksHtml += `<a href="${data.additional_info.reddit}" target="_blank" class="btn btn-outline-danger me-2">Reddit</a>`;
+                                }
+                                $('#links').html(linksHtml);
+
+                                // Update social stats
+                                $('#twitterFollowers').text(formatNumber(data.additional_info.twitter_followers, 0));
+                                $('#redditSubscribers').text(formatNumber(data.additional_info.reddit_subscribers, 0));
+
+                                // Update developer data
+                                const devData = data.additional_info.developer_data;
+                                let devHtml = '';
+                                Object.entries(devData).forEach(([key, value]) => {
+                                    devHtml += `
+                                        <div class="col-md-3 mb-3">
+                                            <div class="stat-card">
+                                                <div class="stat-label">${key.replace(/_/g, ' ').toUpperCase()}</div>
+                                                <div class="stat-value">${formatNumber(value, 0)}</div>
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                                $('#devData').html(devHtml);
+                            }
+
+                            // Update prediction and analysis
+                            if (data.prediction) {
+                                $('#marketContext').text(data.prediction.market_context);
+                                $('#technicalAnalysis').text(data.prediction.technical_analysis);
+                                $('#shortTermPrediction').text(data.prediction.predictions.short_term);
+                                $('#mediumTermPrediction').text(data.prediction.predictions.medium_term);
+                                
+                                // Update risk factors
+                                const riskList = $('#riskFactors');
+                                riskList.empty();
+                                data.prediction.risk_factors.forEach(risk => {
+                                    riskList.append(`<li>${risk}</li>`);
+                                });
+                                
+                                // Update recommendation
+                                const recommendation = data.prediction.recommendation;
+                                const recommendationElement = $('#recommendation');
+                                recommendationElement.text(recommendation.action.toUpperCase());
+                                
+                                // Set recommendation style
+                                let recommendationClass = '';
+                                switch(recommendation.action) {
+                                    case 'achat':
+                                        recommendationClass = 'positive';
+                                        break;
+                                    case 'vente':
+                                        recommendationClass = 'negative';
+                                        break;
+                                    default:
+                                        recommendationClass = 'neutral';
+                                }
+                                recommendationElement.removeClass('positive negative neutral').addClass(recommendationClass);
+                                
+                                // Update confidence bar
+                                $('#recommendationConfidence')
+                                    .css('width', `${recommendation.confidence}%`)
+                                    .attr('aria-valuenow', recommendation.confidence);
+                            }
+
+                            if (data.chart_data) {
+                                initializeCharts();
+                                updateCharts(data.chart_data);
+                            }
+
+                            $('#analysisResults').show();
+                        } else {
+                            $('#errorMessage').text(response.message).show();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#errorMessage').text('Erreur lors de l\'analyse: ' + error).show();
+                    },
+                    complete: function() {
+                        $('#loadingSpinner').hide();
+                    }
+                });
+            });
+        });
+        
+        let currentLang = 'fr';
+        
+        // Language switch functionality
+        $('#langSwitch').click(function() {
+            const button = $(this);
+            const currentLangSpan = button.find('.current-lang');
+            const otherLangSpan = button.find('.other-lang');
+            
+            // Toggle language
+            if (currentLang === 'fr') {
+                currentLang = 'en';
+                currentLangSpan.text('EN');
+                otherLangSpan.text('FR');
+                button.data('lang', 'en');
+                
+                // Update UI text
+                $('h1').text('Cryptocurrency Prediction Bot');
+                $('.card-header h4').each(function() {
+                    const text = $(this).text();
+                    switch(text) {
+                        case 'Informations de Base':
+                            $(this).text('Basic Information');
+                            break;
+                        case 'Variations de Prix':
+                            $(this).text('Price Changes');
+                            break;
+                        case 'Analyse du Marché':
+                            $(this).text('Market Analysis');
+                            break;
+                        case 'Graphiques':
+                            $(this).text('Charts');
+                            break;
+                        case 'Prédictions et Analyse':
+                            $(this).text('Predictions and Analysis');
+                            break;
+                        case 'Informations Supplémentaires':
+                            $(this).text('Additional Information');
+                            break;
+                    }
+                });
+                
+            } else {
+                currentLang = 'fr';
+                currentLangSpan.text('FR');
+                otherLangSpan.text('EN');
+                button.data('lang', 'fr');
+                
+                // Update UI text back to French
+                $('h1').text('Bot de Prédiction de Cryptomonnaies');
+                $('.card-header h4').each(function() {
+                    const text = $(this).text();
+                    switch(text) {
+                        case 'Basic Information':
+                            $(this).text('Informations de Base');
+                            break;
+                        case 'Price Changes':
+                            $(this).text('Variations de Prix');
+                            break;
+                        case 'Market Analysis':
+                            $(this).text('Analyse du Marché');
+                            break;
+                        case 'Charts':
+                            $(this).text('Graphiques');
+                            break;
+                        case 'Predictions and Analysis':
+                            $(this).text('Prédictions et Analyse');
+                            break;
+                        case 'Additional Information':
+                            $(this).text('Informations Supplémentaires');
+                            break;
+                    }
+                });
+            }
+            
+            // If a cryptocurrency is selected, refresh the analysis
+            const selectedCoin = $('#cryptoSelect').val();
+            if (selectedCoin) {
+                $('#analyzeBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>
