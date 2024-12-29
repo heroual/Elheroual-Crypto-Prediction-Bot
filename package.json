@@ -1,0 +1,13 @@
+{
+  "name": "crypto_prediction_bot",
+  "version": "1.0.0",
+  "description": "A crypto prediction bot using machine learning.",
+  "main": "index.js",
+  "scripts": {
+    "start": "python run_app.py"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "author": "Your Name",
+  "license": "MIT"
+}
